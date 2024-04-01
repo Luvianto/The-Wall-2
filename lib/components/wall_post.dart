@@ -1,11 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:the_wall/components/comment_button.dart';
+import 'package:the_wall/components/comments.dart';
 import 'package:the_wall/components/like_button.dart';
+import 'package:the_wall/helper/helper_methods.dart';
 
 class WallPost extends StatefulWidget {
   final String message;
   final String user;
+  final String time;
   final String postId;
   final List<String> likes;
   const WallPost({
@@ -14,6 +18,7 @@ class WallPost extends StatefulWidget {
     required this.user,
     required this.postId,
     required this.likes,
+    required this.time,
   });
 
   @override
@@ -54,6 +59,7 @@ class _WallPostState extends State<WallPost> {
     }
   }
 
+  // Add a comment
   void addComment(String commentText) {
     FirebaseFirestore.instance
         .collection("User Posts")
@@ -62,7 +68,7 @@ class _WallPostState extends State<WallPost> {
         .add({
       "CommentText": commentText,
       "CommentedBy": currentUser.email,
-      "CommentTime": Timestamp.now(),
+      "CommentTime": Timestamp.now(), //remember to format this when displaying
     });
   }
 
@@ -77,16 +83,23 @@ class _WallPostState extends State<WallPost> {
           decoration: InputDecoration(hintText: "Write a comment.."),
         ),
         actions: [
-          // Post Button
-          TextButton(
-            onPressed: () => addComment(_commentTextController.text),
-            child: Text("Post"),
-          ),
-
           // Cancel Button
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text("Cancel"),
+            onPressed: () {
+              Navigator.pop(context);
+              _commentTextController.clear();
+            },
+            child: const Text("Cancel"),
+          ),
+
+          // Post Button
+          TextButton(
+            onPressed: () {
+              addComment(_commentTextController.text);
+              Navigator.pop(context);
+              _commentTextController.clear();
+            },
+            child: const Text("Post"),
           ),
         ],
       ),
@@ -97,30 +110,49 @@ class _WallPostState extends State<WallPost> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.grey.shade200,
         borderRadius: BorderRadius.circular(8),
       ),
       margin: const EdgeInsets.only(top: 25, left: 25, right: 25),
       padding: const EdgeInsets.all(25),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(width: 20),
           //message and user email
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                widget.user,
-                style: TextStyle(color: Colors.grey.shade500),
-              ),
-              const SizedBox(height: 10),
+              // Message
               Text(widget.message),
+
+              const SizedBox(height: 5),
+
+              // Username
+              Row(
+                children: [
+                  Text(
+                    widget.user,
+                    style: TextStyle(color: Colors.grey.shade400),
+                  ),
+                  Text(
+                    " . ",
+                    style: TextStyle(color: Colors.grey.shade400),
+                  ),
+                  Text(
+                    widget.time,
+                    style: TextStyle(color: Colors.grey.shade400),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 5),
             ],
           ),
 
           const SizedBox(height: 20),
 
           Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               // Like button and Like count
               Column(
@@ -129,15 +161,60 @@ class _WallPostState extends State<WallPost> {
                     isLiked: isLiked,
                     onTap: toggleLike,
                   ),
-                  const SizedBox(height: 5),
+                  const SizedBox(height: 5.0),
                   Text(
                     widget.likes.length.toString(),
                     style: const TextStyle(color: Colors.grey),
                   ),
                 ],
               ),
+
+              const SizedBox(width: 10),
+
+              // Comment
+              Column(
+                children: [
+                  CommentButton(
+                    onTap: showCommentDialog,
+                  ),
+                  const SizedBox(height: 5.0),
+                  Text(
+                    '0',
+                    style: const TextStyle(color: Colors.grey),
+                  ),
+                ],
+              ),
             ],
           ),
+          const SizedBox(height: 20),
+          // Comments under the post
+          StreamBuilder(
+              stream: FirebaseFirestore.instance
+                  .collection("User Posts")
+                  .doc(widget.postId)
+                  .collection("Comments")
+                  .orderBy("CommentTime", descending: true)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+
+                return ListView(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: snapshot.data!.docs.map((doc) {
+                    final commentData = doc.data() as Map<String, dynamic>;
+                    return Comment(
+                      text: commentData["CommentText"],
+                      user: commentData["CommentedBy"],
+                      time: formatDate(commentData["CommentTime"]),
+                    );
+                  }).toList(),
+                );
+              }),
         ],
       ),
     );
