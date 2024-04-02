@@ -63,11 +63,11 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
-        title: Text(
+        centerTitle: true,
+        title: const Text(
           'The Wall',
-          style: TextStyle(color: Colors.white),
+          textAlign: TextAlign.center,
         ),
-        iconTheme: IconThemeData(color: Colors.white),
       ),
       drawer: MyDrawer(
         onProfileTap: goToProfilePage,

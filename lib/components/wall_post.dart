@@ -151,8 +151,9 @@ class _WallPostState extends State<WallPost> {
                   .then((value) => print("post deleted"))
                   .catchError(
                       (error) => print("Failed to delete post: $error"));
+              Navigator.pop(context);
             },
-            child: const Text('Cancel'),
+            child: const Text('Delete'),
           ),
         ],
       ),

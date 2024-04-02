@@ -43,7 +43,8 @@ class _LoginPageState extends State<LoginPage> {
       Navigator.pop(context);
 
       // display a dialog message
-      displayMessage(e.code);
+      displayMessage(
+          "Wrong email or password, please try again... Eror: ${e.message}");
     }
   }
 
@@ -60,7 +61,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade300,
+      backgroundColor: Theme.of(context).colorScheme.background,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 25.0),
@@ -120,7 +121,7 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 4),
                   GestureDetector(
                     onTap: widget.onTap,
-                    child: Text(
+                    child: const Text(
                       'Register Now',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,

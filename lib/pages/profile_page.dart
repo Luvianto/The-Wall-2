@@ -68,6 +68,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
+        centerTitle: true,
         title: const Text('P R O F I L E'),
       ),
       body: StreamBuilder<DocumentSnapshot>(
@@ -122,6 +123,8 @@ class _ProfilePageState extends State<ProfilePage> {
                   sectionName: 'bio',
                   onPressed: () => editField('bio'),
                 ),
+
+                const SizedBox(height: 50),
 
                 Padding(
                   padding: const EdgeInsets.only(left: 25.0),

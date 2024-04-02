@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 ThemeData lightTheme = ThemeData(
-  brightness: Brightness.light,
+  // brightness: Brightness.light, eror for some reason??
   appBarTheme: const AppBarTheme(
       backgroundColor: Colors.transparent,
       elevation: 0,
@@ -15,4 +15,6 @@ ThemeData lightTheme = ThemeData(
   textButtonTheme: TextButtonThemeData(
     style: TextButton.styleFrom(foregroundColor: Colors.black),
   ),
+  iconTheme: const IconThemeData(color: Colors.black),
+  textTheme: Typography.blackCupertino,
 );
