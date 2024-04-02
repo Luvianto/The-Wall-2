@@ -2,6 +2,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:the_wall/auth/auth.dart';
 import 'package:the_wall/firebase_options.dart';
+import 'package:the_wall/themes/dark_theme.dart';
+import 'package:the_wall/themes/light_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,9 +18,11 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: AuthPage(),
+      theme: lightTheme,
+      darkTheme: darkTheme,
+      home: const AuthPage(),
     );
   }
 }
