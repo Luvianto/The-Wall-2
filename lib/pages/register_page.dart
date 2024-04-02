@@ -83,7 +83,7 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade300,
+      backgroundColor: Theme.of(context).colorScheme.background,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 25.0),
@@ -151,7 +151,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(width: 4),
                   GestureDetector(
                     onTap: widget.onTap,
-                    child: Text(
+                    child: const Text(
                       'Login Now',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
