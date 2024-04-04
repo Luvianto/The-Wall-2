@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:the_wall/components/button.dart';
 import 'package:the_wall/components/text_field.dart';
 
@@ -31,11 +32,11 @@ class _LoginPageState extends State<LoginPage> {
 
     // try to sign in
     try {
+      // try to sign in
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: emailTextController.text,
         password: passwordTextController.text,
       );
-
       // pop loading circle
       if (context.mounted) Navigator.pop(context);
     } on FirebaseException catch (e) {
@@ -45,6 +46,30 @@ class _LoginPageState extends State<LoginPage> {
       // display a dialog message
       displayMessage(
           "Wrong email or password, please try again... Eror: ${e.message}");
+    }
+  }
+
+  signInWithGoogle() async {
+    showDialog(
+      context: context,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+
+    try {
+      final GoogleSignInAccount? gUser = await GoogleSignIn().signIn();
+      final GoogleSignInAuthentication gAuth = await gUser!.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: gAuth.accessToken,
+        idToken: gAuth.idToken,
+      );
+      if (context.mounted) Navigator.pop(context);
+      return await FirebaseAuth.instance.signInWithCredential(credential);
+    } catch (e) {
+      Navigator.pop(context);
+      displayMessage('Please try again Error: $e');
     }
   }
 
@@ -123,6 +148,17 @@ class _LoginPageState extends State<LoginPage> {
                     onTap: widget.onTap,
                     child: const Text(
                       'Register Now',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  GestureDetector(
+                    onTap: signInWithGoogle,
+                    child: const Text(
+                      ' or sign in with google',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.blue,
