@@ -31,7 +31,13 @@ class _HomePageState extends State<HomePage> {
     try {
       await GoogleSignIn().disconnect();
     } catch (e) {
-      print('failed to disconnect on signout');
+      showDialog(
+        context: context,
+        builder: (context) => const AlertDialog(
+          title: Text('failed to disconnect on signout'),
+        ),
+      );
+      // print('failed to disconnect on signout');
     }
     FirebaseAuth.instance.signOut();
   }
@@ -143,8 +149,8 @@ class _HomePageState extends State<HomePage> {
             ),
             //logged in as
             Text(
-              "Logged in as: " + currentUser.email!,
-              style: TextStyle(color: Colors.grey),
+              "Logged in as:  ${currentUser.email!}",
+              style: const TextStyle(color: Colors.grey),
             ),
             const SizedBox(height: 50),
           ],

@@ -25,14 +25,14 @@ class _ProfilePageState extends State<ProfilePage> {
         backgroundColor: Colors.grey.shade900,
         title: Text(
           "Edit $field",
-          style: TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.white),
         ),
         content: TextField(
           autofocus: true,
-          style: TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.white),
           decoration: InputDecoration(
             hintText: 'Enter new $field',
-            hintStyle: TextStyle(color: Colors.grey),
+            hintStyle: const TextStyle(color: Colors.grey),
           ),
           onChanged: (value) {
             newValue = value;
@@ -40,14 +40,14 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
         actions: [
           TextButton(
-            child: Text(
+            child: const Text(
               'Cancel',
               style: TextStyle(color: Colors.white),
             ),
             onPressed: () => Navigator.pop(context),
           ),
           TextButton(
-            child: Text(
+            child: const Text(
               'Save',
               style: TextStyle(color: Colors.white),
             ),
@@ -57,7 +57,7 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
 
-    if (newValue.trim().length > 0) {
+    if (newValue.trim().isNotEmpty) {
       //only update if there is something on the field
       await usersCollection.doc(currentUser.email).update({field: newValue});
     }
@@ -85,7 +85,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 const SizedBox(height: 50),
 
                 //profile pic
-                Icon(
+                const Icon(
                   Icons.person,
                   size: 72,
                 ),

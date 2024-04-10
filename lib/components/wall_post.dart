@@ -78,10 +78,10 @@ class _WallPostState extends State<WallPost> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text("Add Comment"),
+        title: const Text("Add Comment"),
         content: TextField(
           controller: _commentTextController,
-          decoration: InputDecoration(hintText: "Write a comment.."),
+          decoration: const InputDecoration(hintText: "Write a comment.."),
         ),
         actions: [
           // Cancel Button
@@ -148,9 +148,16 @@ class _WallPostState extends State<WallPost> {
                   .collection("User Posts")
                   .doc(widget.postId)
                   .delete()
-                  .then((value) => print("post deleted"))
-                  .catchError(
-                      (error) => print("Failed to delete post: $error"));
+                  // .then((value) => print("post deleted"))
+                  .catchError((error) {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text("Failed to delete post: $error"),
+                  ),
+                );
+                // print("Failed to delete post: $error");
+              });
               Navigator.pop(context);
             },
             child: const Text('Delete'),
@@ -241,9 +248,9 @@ class _WallPostState extends State<WallPost> {
                     onTap: showCommentDialog,
                   ),
                   const SizedBox(height: 5.0),
-                  Text(
+                  const Text(
                     '0',
-                    style: const TextStyle(color: Colors.grey),
+                    style: TextStyle(color: Colors.grey),
                   ),
                 ],
               ),
@@ -269,7 +276,7 @@ class _WallPostState extends State<WallPost> {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   children: snapshot.data!.docs.map((doc) {
-                    final commentData = doc.data() as Map<String, dynamic>;
+                    final commentData = doc.data();
                     return Comment(
                       text: commentData["CommentText"],
                       user: commentData["CommentedBy"],
