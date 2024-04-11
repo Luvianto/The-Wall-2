@@ -7,7 +7,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 
-class NotificationSetUp {
+class NotificationService {
   static String serverKey =
       'AAAA75KC-5o:APA91bHNalR-dJkjiQpI_LfVaT-zKuhiqf1tkTMU7rUZcwWtWes5hoQWJH4uHCG1dfQyN9ZAM5oAZ1iT_PuqHGuexQK0iWVR4W2d-60be_8S3YFexxwD9PjFvnFWT10H4ahzsPaigR5J';
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
@@ -94,7 +94,7 @@ class NotificationSetUp {
     };
 
     try {
-      http.Response r = await http.post(
+      await http.post(
         Uri.parse('https://fcm.googleapis.com/fcm/send'),
         headers: <String, String>{
           'Content-Type': 'application/json',
@@ -112,13 +112,6 @@ class NotificationSetUp {
           },
         ),
       );
-
-      // print(r.body);
-      // if (r.statusCode == 200) {
-      //   print('done');
-      // } else {
-      //   print(r.statusCode);
-      // }
     } catch (e) {
       // print('Excepton: $e');
     }

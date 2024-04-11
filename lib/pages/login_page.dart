@@ -1,7 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:the_wall/components/button.dart';
+import 'package:the_wall/components/square_tile.dart';
 import 'package:the_wall/components/text_field.dart';
 
 class LoginPage extends StatefulWidget {
@@ -19,6 +22,8 @@ class _LoginPageState extends State<LoginPage> {
   //text editing controller
   final emailTextController = TextEditingController();
   final passwordTextController = TextEditingController();
+  // all users
+  final usersCollection = FirebaseFirestore.instance.collection('Users');
 
   //sign user in
   void signIn() async {
@@ -37,6 +42,15 @@ class _LoginPageState extends State<LoginPage> {
         email: emailTextController.text,
         password: passwordTextController.text,
       );
+
+      // try to get token
+      final String? token = await FirebaseMessaging.instance.getToken();
+
+      // try to update the FcmToken
+      await usersCollection
+          .doc(emailTextController.text)
+          .update({'FcmToken': token});
+
       // pop loading circle
       if (context.mounted) Navigator.pop(context);
     } on FirebaseException catch (e) {
@@ -134,36 +148,34 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(height: 20),
 
               // go to register page
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              Column(
                 children: [
-                  Text(
-                    'Not a member?',
-                    style: TextStyle(
-                      color: Colors.grey.shade700,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  GestureDetector(
-                    onTap: widget.onTap,
-                    child: const Text(
-                      'Register Now',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Not a member?',
+                        style: TextStyle(
+                          color: Colors.grey.shade700,
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 4),
+                      GestureDetector(
+                        onTap: widget.onTap,
+                        child: const Text(
+                          'Register Now',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                    ],
                   ),
-                  const SizedBox(height: 4),
-                  GestureDetector(
+                  SquareTile(
+                    imagePath: 'lib/images/google.png',
                     onTap: signInWithGoogle,
-                    child: const Text(
-                      ' or sign in with google',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue,
-                      ),
-                    ),
                   ),
                 ],
               )

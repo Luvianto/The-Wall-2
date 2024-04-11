@@ -6,6 +6,7 @@ import 'package:the_wall/components/comments.dart';
 import 'package:the_wall/components/delete_button.dart';
 import 'package:the_wall/components/like_button.dart';
 import 'package:the_wall/helper/helper_methods.dart';
+import 'package:the_wall/services/notification_service.dart';
 
 class WallPost extends StatefulWidget {
   final String message;
@@ -13,6 +14,7 @@ class WallPost extends StatefulWidget {
   final String time;
   final String postId;
   final List<String> likes;
+  final String token;
   const WallPost({
     super.key,
     required this.message,
@@ -20,6 +22,7 @@ class WallPost extends StatefulWidget {
     required this.postId,
     required this.likes,
     required this.time,
+    required this.token,
   });
 
   @override
@@ -71,6 +74,13 @@ class _WallPostState extends State<WallPost> {
       "CommentedBy": currentUser.email,
       "CommentTime": Timestamp.now(), //remember to format this when displaying
     });
+
+    // Get the token of the post owner
+    NotificationService.sendNotification(
+      title: currentUser.email,
+      message: commentText,
+      token: widget.token,
+    );
   }
 
   // Muncul sebuah dialog setelah posting komen

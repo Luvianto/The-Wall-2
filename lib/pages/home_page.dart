@@ -6,7 +6,9 @@ import 'package:the_wall/components/drawer.dart';
 import 'package:the_wall/components/text_field.dart';
 import 'package:the_wall/components/wall_post.dart';
 import 'package:the_wall/helper/helper_methods.dart';
+import 'package:the_wall/models/user.dart';
 import 'package:the_wall/pages/profile_page.dart';
+import 'package:the_wall/services/database_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -21,6 +23,25 @@ class _HomePageState extends State<HomePage> {
 
   //text Controller
   final textController = TextEditingController();
+
+  DatabaseService service = DatabaseService();
+  Future<List<MyUser>>? userList;
+  List<MyUser>? retrievedUserList;
+
+  // all users
+  // CollectionReference<Map<String, dynamic>>
+  // final usersCollection = FirebaseFirestore.instance.collection('Users');
+
+  Future<void> _initRetrieval() async {
+    userList = service.retrieveUsers();
+    retrievedUserList = await service.retrieveUsers();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _initRetrieval();
+  }
 
   // sign user out
   void signOut() async {
@@ -108,12 +129,18 @@ class _HomePageState extends State<HomePage> {
                         itemCount: snapshot.data!.docs.length,
                         itemBuilder: (context, index) {
                           final post = snapshot.data!.docs[index];
+                          final user = retrievedUserList!
+                              .where((element) => element.id!
+                                  .toLowerCase()
+                                  .contains(post['UserEmail']))
+                              .first;
                           return WallPost(
                             message: post['Message'],
                             user: post['UserEmail'],
                             postId: post.id,
                             likes: List<String>.from(post['Likes'] ?? []),
                             time: formatDate(post['TimeStamp']),
+                            token: user.fcmToken,
                           );
                         });
                   } else if (snapshot.hasError) {

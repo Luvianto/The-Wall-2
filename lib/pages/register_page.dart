@@ -56,8 +56,9 @@ class _RegisterPageState extends State<RegisterPage> {
           .doc(userCredential.user!.email)
           .set({
         'username': emailTextController.text.split('@')[0],
-        'bio': 'Empty bio..' // initially empty bio
+        'bio': 'Empty bio..', // initially empty bio
         // add any additional field as needed
+        'FcmToken': ''
       });
 
       if (context.mounted) Navigator.pop(context);
