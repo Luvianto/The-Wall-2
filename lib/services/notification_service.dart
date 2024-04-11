@@ -82,9 +82,9 @@ class NotificationService {
 
   static Future<void> sendNotification(
       {String? title, String? message, String? token}) async {
-    // print('\n');
-    // print('token: $token');
-    // print('\n');
+    print('\n');
+    print('token: $token');
+    print('\n');
 
     final data = {
       "click_action": "FLUTTER_NOTIFICATION_CLICK",
@@ -94,7 +94,7 @@ class NotificationService {
     };
 
     try {
-      await http.post(
+      http.Response r = await http.post(
         Uri.parse('https://fcm.googleapis.com/fcm/send'),
         headers: <String, String>{
           'Content-Type': 'application/json',
@@ -112,8 +112,15 @@ class NotificationService {
           },
         ),
       );
+
+      print(r.body);
+      if (r.statusCode == 200) {
+        print('done');
+      } else {
+        print(r.statusCode);
+      }
     } catch (e) {
-      // print('Excepton: $e');
+      print('Excepton: $e');
     }
   }
 }

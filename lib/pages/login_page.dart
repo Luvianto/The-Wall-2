@@ -52,7 +52,7 @@ class _LoginPageState extends State<LoginPage> {
           .update({'FcmToken': token});
 
       // pop loading circle
-      if (context.mounted) Navigator.pop(context);
+      // if (context.mounted) Navigator.pop(context);
     } on FirebaseException catch (e) {
       // pop loading circle
       Navigator.pop(context);
@@ -173,10 +173,10 @@ class _LoginPageState extends State<LoginPage> {
                       const SizedBox(height: 4),
                     ],
                   ),
-                  SquareTile(
-                    imagePath: 'lib/images/google.png',
-                    onTap: signInWithGoogle,
-                  ),
+                  // SquareTile(
+                  //   imagePath: 'lib/images/google_logo.png',
+                  //   onTap: signInWithGoogle,
+                  // ),
                 ],
               )
             ],

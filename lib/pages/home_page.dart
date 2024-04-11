@@ -9,6 +9,7 @@ import 'package:the_wall/helper/helper_methods.dart';
 import 'package:the_wall/models/user.dart';
 import 'package:the_wall/pages/profile_page.dart';
 import 'package:the_wall/services/database_service.dart';
+import 'package:the_wall/services/notification_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -32,14 +33,20 @@ class _HomePageState extends State<HomePage> {
   // CollectionReference<Map<String, dynamic>>
   // final usersCollection = FirebaseFirestore.instance.collection('Users');
 
+  // notification receiver
+  final NotificationService _notiService = NotificationService();
+
   Future<void> _initRetrieval() async {
     userList = service.retrieveUsers();
-    retrievedUserList = await service.retrieveUsers();
+    retrievedUserList = await userList;
+    print('retrievedUserList: $retrievedUserList');
   }
 
   @override
   void initState() {
     super.initState();
+    _notiService.configurePushNotification(context);
+    _notiService.eventListenerCallBack(context);
     _initRetrieval();
   }
 
@@ -52,13 +59,7 @@ class _HomePageState extends State<HomePage> {
     try {
       await GoogleSignIn().disconnect();
     } catch (e) {
-      showDialog(
-        context: context,
-        builder: (context) => const AlertDialog(
-          title: Text('failed to disconnect on signout'),
-        ),
-      );
-      // print('failed to disconnect on signout');
+      print('failed to disconnect on signout');
     }
     FirebaseAuth.instance.signOut();
   }
@@ -110,79 +111,101 @@ class _HomePageState extends State<HomePage> {
         onProfileTap: goToProfilePage,
         onSignOut: signOut,
       ),
-      body: Center(
-        child: Column(
-          children: [
-            //the wall
-            Expanded(
-              child: StreamBuilder(
-                stream: FirebaseFirestore.instance
-                    .collection("User Posts")
-                    .orderBy(
-                      "TimeStamp",
-                      descending: false,
-                    )
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    return ListView.builder(
-                        itemCount: snapshot.data!.docs.length,
-                        itemBuilder: (context, index) {
-                          final post = snapshot.data!.docs[index];
-                          final user = retrievedUserList!
-                              .where((element) => element.id!
-                                  .toLowerCase()
-                                  .contains(post['UserEmail']))
-                              .first;
-                          return WallPost(
-                            message: post['Message'],
-                            user: post['UserEmail'],
-                            postId: post.id,
-                            likes: List<String>.from(post['Likes'] ?? []),
-                            time: formatDate(post['TimeStamp']),
-                            token: user.fcmToken,
-                          );
-                        });
-                  } else if (snapshot.hasError) {
-                    return Center(
-                      child: Text('error: ${snapshot.error}'),
-                    );
-                  }
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                },
-              ),
-            ),
-
-            // post message
-            Padding(
-              padding: const EdgeInsets.all(25.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: MyTextField(
-                      controller: textController,
-                      hintText: 'Write something!',
-                      obscureText: false,
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.arrow_circle_up),
-                    onPressed: postMessage,
+      body: FutureBuilder<List<MyUser>>(
+        future: service.retrieveUsers(),
+        builder: (context, userListSnapshot) {
+          if (userListSnapshot.connectionState == ConnectionState.waiting) {
+            return _buildLoadingIndicator();
+          } else if (userListSnapshot.hasError) {
+            return Center(
+              child:
+                  Text('Error retrieving user list: ${userListSnapshot.error}'),
+            );
+          } else {
+            final List<MyUser>? retrievedUserList = userListSnapshot.data;
+            return StreamBuilder(
+              stream: FirebaseFirestore.instance
+                  .collection("User Posts")
+                  .orderBy(
+                    "TimeStamp",
+                    descending: false,
                   )
-                ],
-              ),
-            ),
-            //logged in as
-            Text(
-              "Logged in as:  ${currentUser.email!}",
-              style: const TextStyle(color: Colors.grey),
-            ),
-            const SizedBox(height: 50),
-          ],
-        ),
+                  .snapshots(),
+              builder: (context, postSnapshot) {
+                if (postSnapshot.connectionState == ConnectionState.waiting) {
+                  return _buildLoadingIndicator();
+                } else if (postSnapshot.hasError) {
+                  return Center(
+                    child: Text(
+                        'Error retrieving user posts: ${postSnapshot.error}'),
+                  );
+                } else {
+                  final posts = postSnapshot.data!.docs;
+                  return _buildPostList(posts, retrievedUserList);
+                }
+              },
+            );
+          }
+        },
       ),
+    );
+  }
+
+  Widget _buildPostList(
+      List<DocumentSnapshot> posts, List<MyUser>? retrievedUserList) {
+    return Center(
+      child: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              itemCount: posts.length,
+              itemBuilder: (context, index) {
+                final post = posts[index];
+                final user = retrievedUserList!
+                    .where((element) => element.id!.contains(post['UserEmail']))
+                    .first;
+                return WallPost(
+                  message: post['Message'],
+                  user: post['UserEmail'],
+                  postId: post.id,
+                  likes: List<String>.from(post['Likes'] ?? []),
+                  time: formatDate(post['TimeStamp']),
+                  token: user.fcmToken,
+                );
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(25.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: MyTextField(
+                    controller: textController,
+                    hintText: 'Write something!',
+                    obscureText: false,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.arrow_circle_up),
+                  onPressed: postMessage,
+                )
+              ],
+            ),
+          ),
+          Text(
+            "Logged in as:  ${currentUser.email!}",
+            style: const TextStyle(color: Colors.grey),
+          ),
+          const SizedBox(height: 50),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingIndicator() {
+    return const Center(
+      child: CircularProgressIndicator(),
     );
   }
 }

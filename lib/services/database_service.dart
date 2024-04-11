@@ -7,7 +7,7 @@ class DatabaseService {
 
   Future<List<MyUser>> retrieveUsers() async {
     QuerySnapshot<Map<String, dynamic>> snapshot =
-        await FirebaseFirestore.instance.collection("User").get();
+        await FirebaseFirestore.instance.collection("Users").get();
     return snapshot.docs
         .map((docSnapshot) => MyUser.fromDocumentSnapshot(docSnapshot))
         .toList();

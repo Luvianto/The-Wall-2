@@ -74,13 +74,14 @@ class _WallPostState extends State<WallPost> {
       "CommentedBy": currentUser.email,
       "CommentTime": Timestamp.now(), //remember to format this when displaying
     });
-
-    // Get the token of the post owner
-    NotificationService.sendNotification(
-      title: currentUser.email,
-      message: commentText,
-      token: widget.token,
-    );
+    // if the owner comments on it's own post don't send notification
+    if (currentUser.email != widget.user) {
+      NotificationService.sendNotification(
+        title: currentUser.email,
+        message: commentText,
+        token: widget.token.toString(),
+      );
+    }
   }
 
   // Muncul sebuah dialog setelah posting komen
